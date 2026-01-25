@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tournament-cli"
+version = "1.0.0"
+description = "2v2 Tournament CLI Manager - Track standings, teams, and stats"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Tade Strehk", email = "github@strehk.eu"}
+]
+keywords = ["tournament", "cli", "2v2", "standings", "sports"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment",
+]
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "markdown>=3.5.0",
+    "weasyprint>=60.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/strehk/tournament-cli"
+Repository = "https://github.com/strehk/tournament-cli"
+Issues = "https://github.com/strehk/tournament-cli/issues"
+
+[project.scripts]
+tournament-cli = "tournament_cli.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
