@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 from tournament_cli.models import Tournament, Player
 from tournament_cli.display import calculate_partnership_stats, calculate_team_stats
 
@@ -328,7 +329,7 @@ def _export_player_stats(player: Player, tournament: Tournament) -> list[str]:
     return lines
 
 
-def save_markdown_export(tournament: Tournament, path: Path | None = None) -> Path:
+def save_markdown_export(tournament: Tournament, path: Optional[Path] = None) -> Path:
     """Save tournament export to a Markdown file."""
     if path is None:
         safe_name = "".join(c if c.isalnum() or c in "-_" else "_" for c in tournament.name)
@@ -339,7 +340,7 @@ def save_markdown_export(tournament: Tournament, path: Path | None = None) -> Pa
     return path
 
 
-def export_tournament_pdf(tournament: Tournament, path: Path | None = None) -> Path:
+def export_tournament_pdf(tournament: Tournament, path: Optional[Path] = None) -> Path:
     """Export tournament to a styled PDF file."""
     import markdown
     from weasyprint import HTML, CSS
