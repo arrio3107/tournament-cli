@@ -20,8 +20,6 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: tournament-cli-linux-x86_64
-          - os: macos-13
-            artifact_name: tournament-cli-macos-x86_64
           - os: macos-latest
             artifact_name: tournament-cli-macos-arm64
           - os: windows-latest
