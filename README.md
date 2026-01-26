@@ -1,6 +1,8 @@
 # Tournament CLI
 
-A command-line tool for managing tournaments with flexible team sizes (1v1, 2v2, 1v2, 3v3, and more). Originally built for FIFA gaming sessions with friends, but works for any competition format.
+![Banner](img/banner.png)
+
+A command-line tool for managing tournaments with flexible team sizes (1v1, 2v2, 1v2, 3v3, and more). Originally built for FIFA gaming sessions with friends, but works for any score based competition format.
 
 This project is in large parts coded by Claude Code (Opus 4.5).
 
@@ -166,22 +168,22 @@ Use `add-round` mid-tournament if you decide to extend.
 
 ## Commands Reference
 
-| Command                    | Description                     |
-| -------------------------- | ------------------------------- |
-| `new <name> -m <mode>`     | Create a new tournament         |
-| `list`           | List all saved tournaments      |
-| `load <name>`    | Load an existing tournament     |
-| `status`         | Show tournament overview        |
-| `schedule`       | Show all matches                |
-| `schedule -r`    | Show only remaining matches     |
-| `play [id]`      | Record a match result           |
-| `standings`      | Show player rankings            |
-| `teams`          | Show team (pair) rankings       |
-| `stats <player>` | Show detailed player statistics |
-| `reset`          | Reset all match results         |
-| `export`         | Export to Markdown              |
-| `export --pdf`   | Export to PDF                   |
-| `tui`            | Launch interactive TUI          |
+| Command                | Description                     |
+| ---------------------- | ------------------------------- |
+| `new <name> -m <mode>` | Create a new tournament         |
+| `list`                 | List all saved tournaments      |
+| `load <name>`          | Load an existing tournament     |
+| `status`               | Show tournament overview        |
+| `schedule`             | Show all matches                |
+| `schedule -r`          | Show only remaining matches     |
+| `play [id]`            | Record a match result           |
+| `standings`            | Show player rankings            |
+| `teams`                | Show team (pair) rankings       |
+| `stats <player>`       | Show detailed player statistics |
+| `reset`                | Reset all match results         |
+| `export`               | Export to Markdown              |
+| `export --pdf`         | Export to PDF                   |
+| `tui`                  | Launch interactive TUI          |
 
 ## Interactive TUI
 
@@ -195,27 +197,27 @@ The TUI provides a lazygit-inspired interface with multiple panels showing match
 
 ### Panels
 
-| Panel | Description |
-|-------|-------------|
-| **Matches** | Scrollable list of all matches with status indicators (✓ for played) and scores |
-| **Standings** | Player rankings table - select a player and press Enter for detailed stats |
-| **Teams** | Team (pair) performance rankings (display only, 2v2+ modes) |
-| **Score Entry** | Input fields for recording match scores |
+| Panel           | Description                                                                     |
+| --------------- | ------------------------------------------------------------------------------- |
+| **Matches**     | Scrollable list of all matches with status indicators (✓ for played) and scores |
+| **Standings**   | Player rankings table - select a player and press Enter for detailed stats      |
+| **Teams**       | Team (pair) performance rankings (display only, 2v2+ modes)                     |
+| **Score Entry** | Input fields for recording match scores                                         |
 
 ### Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| `m` | Focus matches panel |
-| `s` | Focus standings panel |
-| `i` | Focus score input |
-| `Tab` | Cycle between panels |
-| `j` / `↓` | Navigate down in focused panel |
-| `k` / `↑` | Navigate up in focused panel |
-| `Enter` | Context-sensitive: jump to input (matches), open player stats (standings), save score (input) |
-| `n` | Jump to next unplayed match |
-| `r` | Refresh tournament data from disk |
-| `q` | Quit |
+| Key       | Action                                                                                        |
+| --------- | --------------------------------------------------------------------------------------------- |
+| `m`       | Focus matches panel                                                                           |
+| `s`       | Focus standings panel                                                                         |
+| `i`       | Focus score input                                                                             |
+| `Tab`     | Cycle between panels                                                                          |
+| `j` / `↓` | Navigate down in focused panel                                                                |
+| `k` / `↑` | Navigate up in focused panel                                                                  |
+| `Enter`   | Context-sensitive: jump to input (matches), open player stats (standings), save score (input) |
+| `n`       | Jump to next unplayed match                                                                   |
+| `r`       | Refresh tournament data from disk                                                             |
+| `q`       | Quit                                                                                          |
 
 ### Player Stats Modal
 
@@ -252,29 +254,30 @@ Export your tournament to Markdown or PDF format with `tournament-cli export` or
 
 **Mode:** 2v2 | **Players:** 5 | **Matches:** 7/15 | **Progress:** 47%
 
-*Exported: 2026-01-26 02:16*
+_Exported: 2026-01-26 02:16_
 
 ---
 
 ## Standings
 
-| # | Player | P | W | D | L | GF | GA | GD | Pts | Win% |
-|:-:|--------|:-:|:-:|:-:|:-:|:--:|:--:|:--:|:---:|:----:|
-| 🥇 | **Carol** | 6 | 4 | 1 | 1 | 13 | 8 | +5 | **13** | 67% |
-| 🥈 | **Alice** | 6 | 3 | 2 | 1 | 12 | 8 | +4 | **11** | 50% |
-| 🥉 | **Bob** | 6 | 2 | 2 | 2 | 7 | 9 | -2 | **8** | 33% |
-| 4 | **Dave** | 5 | 1 | 2 | 2 | 8 | 9 | -1 | **5** | 20% |
-| 5 | **Eve** | 5 | 0 | 1 | 4 | 6 | 12 | -6 | **1** | 0% |
+|  #  | Player    |  P  |  W  |  D  |  L  | GF  | GA  | GD  |  Pts   | Win% |
+| :-: | --------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :----: | :--: |
+| 🥇  | **Carol** |  6  |  4  |  1  |  1  | 13  |  8  | +5  | **13** | 67%  |
+| 🥈  | **Alice** |  6  |  3  |  2  |  1  | 12  |  8  | +4  | **11** | 50%  |
+| 🥉  | **Bob**   |  6  |  2  |  2  |  2  |  7  |  9  | -2  | **8**  | 33%  |
+|  4  | **Dave**  |  5  |  1  |  2  |  2  |  8  |  9  | -1  | **5**  | 20%  |
+|  5  | **Eve**   |  5  |  0  |  1  |  4  |  6  | 12  | -6  | **1**  |  0%  |
 
 ---
 
 ## Best Teams
 
-| # | Team | P | W | D | L | GF | GA | GD | Pts | Win% |
-|:-:|------|:-:|:-:|:-:|:-:|:--:|:--:|:--:|:---:|:----:|
-| 🥇 | **Alice & Carol** | 3 | 2 | 1 | 0 | 7 | 3 | +4 | **7** | 67% |
-| 🥈 | **Alice & Bob** | 3 | 1 | 1 | 1 | 5 | 5 | 0 | **4** | 33% |
-| 🥉 | **Carol & Dave** | 1 | 1 | 0 | 0 | 3 | 2 | +1 | **3** | 100% |
+|  #  | Team              |  P  |  W  |  D  |  L  | GF  | GA  | GD  |  Pts  | Win% |
+| :-: | ----------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :---: | :--: |
+| 🥇  | **Alice & Carol** |  3  |  2  |  1  |  0  |  7  |  3  | +4  | **7** | 67%  |
+| 🥈  | **Alice & Bob**   |  3  |  1  |  1  |  1  |  5  |  5  |  0  | **4** | 33%  |
+| 🥉  | **Carol & Dave**  |  1  |  1  |  0  |  0  |  3  |  2  | +1  | **3** | 100% |
+
 ...
 ```
 
