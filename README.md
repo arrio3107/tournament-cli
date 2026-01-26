@@ -228,6 +228,65 @@ When viewing standings, select a player with `j`/`k` and press `Enter` to view d
 
 Press `q` or `Esc` to close the modal.
 
+## Screenshots
+
+### Interactive TUI
+
+The main TUI screen with matches, standings, teams, and score entry panels:
+
+![TUI Home Screen](img/tui-1.png)
+
+Player stats modal showing detailed statistics and partnership performance:
+
+![TUI Player Stats](img/tui-2.png)
+
+### Export Samples
+
+Export your tournament to Markdown or PDF format with `tournament-cli export` or `tournament-cli export --pdf`.
+
+<details>
+<summary>Markdown Export Sample</summary>
+
+```markdown
+# Awkward Fifth
+
+**Mode:** 2v2 | **Players:** 5 | **Matches:** 7/15 | **Progress:** 47%
+
+*Exported: 2026-01-26 02:16*
+
+---
+
+## Standings
+
+| # | Player | P | W | D | L | GF | GA | GD | Pts | Win% |
+|:-:|--------|:-:|:-:|:-:|:-:|:--:|:--:|:--:|:---:|:----:|
+| 🥇 | **Carol** | 6 | 4 | 1 | 1 | 13 | 8 | +5 | **13** | 67% |
+| 🥈 | **Alice** | 6 | 3 | 2 | 1 | 12 | 8 | +4 | **11** | 50% |
+| 🥉 | **Bob** | 6 | 2 | 2 | 2 | 7 | 9 | -2 | **8** | 33% |
+| 4 | **Dave** | 5 | 1 | 2 | 2 | 8 | 9 | -1 | **5** | 20% |
+| 5 | **Eve** | 5 | 0 | 1 | 4 | 6 | 12 | -6 | **1** | 0% |
+
+---
+
+## Best Teams
+
+| # | Team | P | W | D | L | GF | GA | GD | Pts | Win% |
+|:-:|------|:-:|:-:|:-:|:-:|:--:|:--:|:--:|:---:|:----:|
+| 🥇 | **Alice & Carol** | 3 | 2 | 1 | 0 | 7 | 3 | +4 | **7** | 67% |
+| 🥈 | **Alice & Bob** | 3 | 1 | 1 | 1 | 5 | 5 | 0 | **4** | 33% |
+| 🥉 | **Carol & Dave** | 1 | 1 | 0 | 0 | 3 | 2 | +1 | **3** | 100% |
+...
+```
+
+</details>
+
+<details>
+<summary>PDF Export Sample</summary>
+
+![PDF Export](img/export.pdf)
+
+</details>
+
 ## How It Works
 
 For a 2v2 tournament with `n` players, the CLI generates all possible matchups where:
