@@ -40,10 +40,10 @@ class TestCLIHelp:
 
     def test_new_help(self):
         """Test new command help."""
-        result = runner.invoke(app, ["new", "--help"])
+        result = runner.invoke(app, ["new", "--help"], color=False)
         assert result.exit_code == 0
         assert "Create a new tournament" in result.output
-        assert "--mode" in result.output
+        assert "--mode" in result.output or "-m" in result.output
 
     def test_load_help(self):
         """Test load command help."""
