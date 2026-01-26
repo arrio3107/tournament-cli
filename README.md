@@ -7,6 +7,7 @@ This project is in large parts coded by Claude Code (Opus 4.5).
 ## Features
 
 - **Flexible matchmaking**: Supports 1v1, 2v2, 1v2 (handicap), 3v3, and custom modes. Automatically generates all possible matchups where every player plays with and against everyone else
+- **Interactive TUI**: Full-screen terminal interface with keyboard navigation, live standings, and player stats modals
 - **Player standings**: Track wins, draws, losses, goals, and points with automatic ranking
 - **Team rankings**: See which player pairings perform best together
 - **Player statistics**: Detailed stats including partnership performance with each teammate
@@ -170,6 +171,52 @@ tournament-cli new "Marathon Night" --mode 2v2 --rounds 2
 | `reset`          | Reset all match results         |
 | `export`         | Export to Markdown              |
 | `export --pdf`   | Export to PDF                   |
+| `tui`            | Launch interactive TUI          |
+
+## Interactive TUI
+
+Launch the full-screen terminal interface for a more visual experience:
+
+```bash
+tournament-cli tui
+```
+
+The TUI provides a lazygit-inspired interface with multiple panels showing matches, standings, team stats, and score entry simultaneously.
+
+### Panels
+
+| Panel | Description |
+|-------|-------------|
+| **Matches** | Scrollable list of all matches with status indicators (✓ for played) and scores |
+| **Standings** | Player rankings table - select a player and press Enter for detailed stats |
+| **Teams** | Team (pair) performance rankings (display only, 2v2+ modes) |
+| **Score Entry** | Input fields for recording match scores |
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `m` | Focus matches panel |
+| `s` | Focus standings panel |
+| `i` | Focus score input |
+| `Tab` | Cycle between panels |
+| `j` / `↓` | Navigate down in focused panel |
+| `k` / `↑` | Navigate up in focused panel |
+| `Enter` | Context-sensitive: jump to input (matches), open player stats (standings), save score (input) |
+| `n` | Jump to next unplayed match |
+| `r` | Refresh tournament data from disk |
+| `q` | Quit |
+
+### Player Stats Modal
+
+When viewing standings, select a player with `j`/`k` and press `Enter` to view detailed statistics:
+
+- Games played, win/draw/loss record
+- Points and win rate percentage
+- Goals scored, conceded, and goal difference
+- Partnership stats showing performance with each teammate (in team modes)
+
+Press `q` or `Esc` to close the modal.
 
 ## How It Works
 
