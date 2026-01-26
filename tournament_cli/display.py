@@ -1,14 +1,23 @@
 """Rich formatting and display utilities."""
 
+from typing import Optional, Tuple
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, BarColumn, TextColumn
 from rich.text import Text
 from tournament_cli.models import Tournament, Player, Match
+from tournament_cli.matchmaking import get_sitting_out
 
 
 console = Console()
+
+
+def format_team(team: Tuple[str, ...]) -> str:
+    """Format team tuple as string."""
+    if len(team) == 1:
+        return team[0]
+    return " & ".join(team)
 
 
 def print_success(message: str) -> None:
@@ -36,7 +45,11 @@ def display_tournament_status(tournament: Tournament) -> None:
     # Header panel
     header = Text()
     header.append(f"{tournament.name}\n", style="bold cyan")
+    header.append(f"Mode: {tournament.mode} | ", style="dim")
     header.append(f"Players: {len(tournament.players)} | ", style="dim")
+    round_count = tournament.current_round_count
+    if round_count > 1:
+        header.append(f"Rounds: {round_count} | ", style="dim")
     header.append(f"Matches: {tournament.played_matches}/{tournament.total_matches}")
 
     console.print(Panel(header, title="Tournament Status", border_style="cyan"))
@@ -108,41 +121,29 @@ def display_standings(tournament: Tournament) -> None:
     console.print(table)
 
 
-def display_schedule(tournament: Tournament, show_all: bool = True) -> None:
+def display_schedule(tournament: Tournament, show_all: bool = True, round_filter: Optional[int] = None) -> None:
     """Display match schedule."""
-    table = Table(title=f"{tournament.name} - Schedule", border_style="cyan")
+    round_count = tournament.current_round_count
+    has_multiple_rounds = round_count > 1
 
-    table.add_column("ID", justify="center", style="dim", width=4)
-    table.add_column("Status", justify="center", width=6)
-    table.add_column("Team 1", style="cyan")
-    table.add_column("Score", justify="center", width=7)
-    table.add_column("Team 2", style="magenta")
+    # Filter matches
+    matches_to_show = tournament.matches
+    if round_filter is not None:
+        matches_to_show = [m for m in matches_to_show if m.round == round_filter]
+    if not show_all:
+        matches_to_show = [m for m in matches_to_show if not m.played]
 
-    for match in tournament.matches:
-        if not show_all and match.played:
-            continue
-
-        status = "[green]Done[/green]" if match.played else "[yellow]Pend[/yellow]"
-        team1_str = f"{match.team1[0]} & {match.team1[1]}"
-        team2_str = f"{match.team2[0]} & {match.team2[1]}"
-
-        if match.played:
-            score_str = f"{match.score1} - {match.score2}"
-        else:
-            score_str = "- vs -"
-
-        table.add_row(
-            str(match.id),
-            status,
-            team1_str,
-            score_str,
-            team2_str,
-        )
-
-    console.print(table)
+    # Group by round if multiple rounds
+    if has_multiple_rounds:
+        rounds = sorted(set(m.round for m in matches_to_show))
+        for round_num in rounds:
+            round_matches = [m for m in matches_to_show if m.round == round_num]
+            _display_round_schedule(tournament, round_matches, round_num)
+            console.print()
+    else:
+        _display_round_schedule(tournament, matches_to_show)
 
     # Summary
-    console.print()
     console.print(
         f"[dim]Played: {tournament.played_matches} | "
         f"Remaining: {tournament.remaining_matches} | "
@@ -150,10 +151,58 @@ def display_schedule(tournament: Tournament, show_all: bool = True) -> None:
     )
 
 
+def _display_round_schedule(tournament: Tournament, matches: list, round_num: Optional[int] = None) -> None:
+    """Display schedule for a single round or all matches."""
+    title = f"{tournament.name} - Schedule ({tournament.mode})"
+    if round_num is not None:
+        title = f"Round {round_num}"
+
+    table = Table(title=title, border_style="cyan")
+
+    # Determine if we need to show "Sitting Out" column
+    all_players = [p.name for p in tournament.players]
+    players_per_match = tournament.team1_size + tournament.team2_size
+    show_sitting_out = len(all_players) > players_per_match
+
+    table.add_column("ID", justify="center", style="dim", width=4)
+    table.add_column("Status", justify="center", width=6)
+    table.add_column("Team 1", style="cyan")
+    table.add_column("Score", justify="center", width=7)
+    table.add_column("Team 2", style="magenta")
+    if show_sitting_out:
+        table.add_column("Sitting Out", style="dim")
+
+    for match in matches:
+        status = "[green]Done[/green]" if match.played else "[yellow]Pend[/yellow]"
+        team1_str = format_team(match.team1)
+        team2_str = format_team(match.team2)
+
+        if match.played:
+            score_str = f"{match.score1} - {match.score2}"
+        else:
+            score_str = "- vs -"
+
+        row = [
+            str(match.id),
+            status,
+            team1_str,
+            score_str,
+            team2_str,
+        ]
+
+        if show_sitting_out:
+            sitting = get_sitting_out(match, all_players)
+            row.append(", ".join(sitting) if sitting else "-")
+
+        table.add_row(*row)
+
+    console.print(table)
+
+
 def display_match(match: Match) -> None:
     """Display a single match."""
-    team1_str = f"{match.team1[0]} & {match.team1[1]}"
-    team2_str = f"{match.team2[0]} & {match.team2[1]}"
+    team1_str = format_team(match.team1)
+    team2_str = format_team(match.team2)
 
     content = Text()
     content.append(f"Match #{match.id}\n\n", style="bold")
@@ -221,27 +270,34 @@ def calculate_partnership_stats(player_name: str, tournament: Tournament) -> dic
         if not match.played:
             continue
 
-        partner = None
+        partners = []
         is_team1 = False
 
         if player_name in match.team1:
-            partner = match.team1[0] if match.team1[1] == player_name else match.team1[1]
+            # Find all partners (other players on the same team)
+            partners = [p for p in match.team1 if p != player_name]
             is_team1 = True
         elif player_name in match.team2:
-            partner = match.team2[0] if match.team2[1] == player_name else match.team2[1]
+            partners = [p for p in match.team2 if p != player_name]
             is_team1 = False
         else:
             continue
 
-        if partner not in stats:
-            stats[partner] = {"wins": 0, "draws": 0, "losses": 0}
+        # Skip if no partners (1v1 mode)
+        if not partners:
+            continue
 
-        if match.is_draw:
-            stats[partner]["draws"] += 1
-        elif (is_team1 and match.score1 > match.score2) or (not is_team1 and match.score2 > match.score1):
-            stats[partner]["wins"] += 1
-        else:
-            stats[partner]["losses"] += 1
+        # Update stats for each partner
+        for partner in partners:
+            if partner not in stats:
+                stats[partner] = {"wins": 0, "draws": 0, "losses": 0}
+
+            if match.is_draw:
+                stats[partner]["draws"] += 1
+            elif (is_team1 and match.score1 > match.score2) or (not is_team1 and match.score2 > match.score1):
+                stats[partner]["wins"] += 1
+            else:
+                stats[partner]["losses"] += 1
 
     return stats
 
@@ -263,7 +319,11 @@ def display_tournaments_list(tournaments: list[str]) -> None:
 
 
 def calculate_team_stats(tournament: Tournament) -> list[dict]:
-    """Calculate statistics for each unique team pairing."""
+    """Calculate statistics for each unique team.
+
+    For asymmetric modes, team1 and team2 may have different sizes,
+    so we track them separately.
+    """
     team_stats = {}
 
     for match in tournament.matches:
@@ -315,7 +375,13 @@ def calculate_team_stats(tournament: Tournament) -> list[dict]:
 
 def display_teams(tournament: Tournament) -> None:
     """Display team rankings table."""
-    table = Table(title=f"{tournament.name} - Best Teams", border_style="cyan")
+    # For 1v1, team stats don't make sense
+    if tournament.team1_size == 1 and tournament.team2_size == 1:
+        print_info("Team statistics are not available for 1v1 tournaments.")
+        print_info("Use 'standings' to view individual player rankings.")
+        return
+
+    table = Table(title=f"{tournament.name} - Best Teams ({tournament.mode})", border_style="cyan")
 
     table.add_column("#", justify="center", style="dim", width=4)
     table.add_column("Team", style="bold")
@@ -334,7 +400,7 @@ def display_teams(tournament: Tournament) -> None:
 
     for i, stats in enumerate(team_stats, 1):
         rank = medals[i - 1] if i <= 3 else str(i)
-        team_name = f"{stats['players'][0]} & {stats['players'][1]}"
+        team_name = format_team(stats['players'])
 
         gd = stats["goal_diff"]
         gd_str = f"+{gd}" if gd > 0 else str(gd)

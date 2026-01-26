@@ -4,7 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from tournament_cli.models import Tournament, Player
-from tournament_cli.display import calculate_partnership_stats, calculate_team_stats
+from tournament_cli.display import calculate_partnership_stats, calculate_team_stats, format_team
+from tournament_cli.matchmaking import get_sitting_out
 
 
 # CSS styling for PDF export
@@ -127,9 +128,18 @@ def export_tournament_markdown(tournament: Tournament) -> str:
     # Header
     lines.append(f"# {tournament.name}")
     lines.append("")
-    lines.append(f"**Players:** {len(tournament.players)} | "
-                 f"**Matches:** {tournament.played_matches}/{tournament.total_matches} | "
-                 f"**Progress:** {tournament.completion_percentage:.0f}%")
+    header_parts = [
+        f"**Mode:** {tournament.mode}",
+        f"**Players:** {len(tournament.players)}",
+    ]
+    round_count = tournament.current_round_count
+    if round_count > 1:
+        header_parts.append(f"**Rounds:** {round_count}")
+    header_parts.extend([
+        f"**Matches:** {tournament.played_matches}/{tournament.total_matches}",
+        f"**Progress:** {tournament.completion_percentage:.0f}%"
+    ])
+    lines.append(" | ".join(header_parts))
     lines.append("")
     lines.append(f"*Exported: {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
     lines.append("")
@@ -142,13 +152,14 @@ def export_tournament_markdown(tournament: Tournament) -> str:
     lines.extend(_export_standings(tournament))
     lines.append("")
 
-    # Best Teams
-    lines.append("---")
-    lines.append("")
-    lines.append("## Best Teams")
-    lines.append("")
-    lines.extend(_export_teams(tournament))
-    lines.append("")
+    # Best Teams (skip for 1v1)
+    if not (tournament.team1_size == 1 and tournament.team2_size == 1):
+        lines.append("---")
+        lines.append("")
+        lines.append("## Best Teams")
+        lines.append("")
+        lines.extend(_export_teams(tournament))
+        lines.append("")
 
     # Schedule
     lines.append("---")
@@ -221,7 +232,7 @@ def _export_teams(tournament: Tournament) -> list[str]:
 
     for i, stats in enumerate(team_stats, 1):
         rank = medals[i - 1] if i <= 3 else str(i)
-        team_name = f"{stats['players'][0]} & {stats['players'][1]}"
+        team_name = format_team(stats['players'])
 
         gd = stats["goal_diff"]
         gd_str = f"+{gd}" if gd > 0 else str(gd)
@@ -240,6 +251,14 @@ def _export_schedule(tournament: Tournament) -> list[str]:
     """Export schedule table as Markdown."""
     lines = []
 
+    round_count = tournament.current_round_count
+    has_multiple_rounds = round_count > 1
+
+    # Determine if we need sitting out column
+    all_players = [p.name for p in tournament.players]
+    players_per_match = tournament.team1_size + tournament.team2_size
+    show_sitting_out = len(all_players) > players_per_match
+
     # Separate played and pending matches
     played_matches = [m for m in tournament.matches if m.played]
     pending_matches = [m for m in tournament.matches if not m.played]
@@ -247,12 +266,68 @@ def _export_schedule(tournament: Tournament) -> list[str]:
     if played_matches:
         lines.append("### Completed Matches")
         lines.append("")
-        lines.append("| # | Team 1 | Score | Team 2 |")
-        lines.append("|:-:|--------|:-----:|--------|")
 
-        for match in played_matches:
-            team1_name = f"{match.team1[0]} & {match.team1[1]}"
-            team2_name = f"{match.team2[0]} & {match.team2[1]}"
+        if has_multiple_rounds:
+            # Group by round
+            rounds = sorted(set(m.round for m in played_matches))
+            for round_num in rounds:
+                round_matches = [m for m in played_matches if m.round == round_num]
+                lines.append(f"#### Round {round_num}")
+                lines.append("")
+                lines.extend(_export_match_table(round_matches, played=True, all_players=all_players if show_sitting_out else None))
+                lines.append("")
+        else:
+            lines.extend(_export_match_table(played_matches, played=True, all_players=all_players if show_sitting_out else None))
+            lines.append("")
+
+    if pending_matches:
+        lines.append("### Upcoming Matches")
+        lines.append("")
+
+        if has_multiple_rounds:
+            # Group by round
+            rounds = sorted(set(m.round for m in pending_matches))
+            for round_num in rounds:
+                round_matches = [m for m in pending_matches if m.round == round_num]
+                lines.append(f"#### Round {round_num}")
+                lines.append("")
+                lines.extend(_export_match_table(round_matches, played=False, all_players=all_players if show_sitting_out else None))
+                lines.append("")
+        else:
+            lines.extend(_export_match_table(pending_matches, played=False, all_players=all_players if show_sitting_out else None))
+            lines.append("")
+
+    # Summary
+    summary = f"**Played:** {tournament.played_matches} | **Remaining:** {tournament.remaining_matches} | **Total:** {tournament.total_matches}"
+    if has_multiple_rounds:
+        summary += f" | **Rounds:** {round_count}"
+    lines.append(summary)
+
+    return lines
+
+
+def _export_match_table(matches: list, played: bool, all_players: Optional[list[str]] = None) -> list[str]:
+    """Export a table of matches.
+
+    Args:
+        matches: List of Match objects
+        played: Whether these are played matches (affects columns shown)
+        all_players: If provided, adds a "Sitting Out" column showing who's not playing
+    """
+    lines = []
+    show_sitting_out = all_players is not None
+
+    if played:
+        if show_sitting_out:
+            lines.append("| # | Team 1 | Score | Team 2 | Sitting Out |")
+            lines.append("|:-:|--------|:-----:|--------|-------------|")
+        else:
+            lines.append("| # | Team 1 | Score | Team 2 |")
+            lines.append("|:-:|--------|:-----:|--------|")
+
+        for match in matches:
+            team1_name = format_team(match.team1)
+            team2_name = format_team(match.team2)
 
             # Bold the winning team
             if match.is_draw:
@@ -266,27 +341,31 @@ def _export_schedule(tournament: Tournament) -> list[str]:
                 team2_str = f"**{team2_name}**"
 
             score_str = f"{match.score1} - {match.score2}"
-            lines.append(f"| {match.id} | {team1_str} | {score_str} | {team2_str} |")
 
-        lines.append("")
+            if show_sitting_out:
+                sitting = get_sitting_out(match, all_players)
+                sitting_str = ", ".join(sitting) if sitting else "-"
+                lines.append(f"| {match.id} | {team1_str} | {score_str} | {team2_str} | {sitting_str} |")
+            else:
+                lines.append(f"| {match.id} | {team1_str} | {score_str} | {team2_str} |")
+    else:
+        if show_sitting_out:
+            lines.append("| # | Team 1 | vs | Team 2 | Sitting Out |")
+            lines.append("|:-:|--------|:--:|--------|-------------|")
+        else:
+            lines.append("| # | Team 1 | vs | Team 2 |")
+            lines.append("|:-:|--------|:--:|--------|")
 
-    if pending_matches:
-        lines.append("### Upcoming Matches")
-        lines.append("")
-        lines.append("| # | Team 1 | vs | Team 2 |")
-        lines.append("|:-:|--------|:--:|--------|")
+        for match in matches:
+            team1_str = format_team(match.team1)
+            team2_str = format_team(match.team2)
 
-        for match in pending_matches:
-            team1_str = f"{match.team1[0]} & {match.team1[1]}"
-            team2_str = f"{match.team2[0]} & {match.team2[1]}"
-            lines.append(f"| {match.id} | {team1_str} | vs | {team2_str} |")
-
-        lines.append("")
-
-    # Summary
-    lines.append(f"**Played:** {tournament.played_matches} | "
-                 f"**Remaining:** {tournament.remaining_matches} | "
-                 f"**Total:** {tournament.total_matches}")
+            if show_sitting_out:
+                sitting = get_sitting_out(match, all_players)
+                sitting_str = ", ".join(sitting) if sitting else "-"
+                lines.append(f"| {match.id} | {team1_str} | vs | {team2_str} | {sitting_str} |")
+            else:
+                lines.append(f"| {match.id} | {team1_str} | vs | {team2_str} |")
 
     return lines
 

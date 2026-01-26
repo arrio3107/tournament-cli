@@ -32,6 +32,24 @@ def sample_player():
 
 
 @pytest.fixture
+def two_players():
+    """Create a list of 2 player names."""
+    return ["Alice", "Bob"]
+
+
+@pytest.fixture
+def three_players():
+    """Create a list of 3 player names."""
+    return ["Alice", "Bob", "Charlie"]
+
+
+@pytest.fixture
+def six_players():
+    """Create a list of 6 player names."""
+    return ["Alice", "Bob", "Charlie", "Dave", "Eve", "Frank"]
+
+
+@pytest.fixture
 def sample_match_unplayed():
     """Create an unplayed match."""
     return Match(
@@ -66,6 +84,36 @@ def sample_match_draw():
 
 
 @pytest.fixture
+def sample_match_1v1():
+    """Create a 1v1 match."""
+    return Match(
+        id=1,
+        team1=("Alice",),
+        team2=("Bob",)
+    )
+
+
+@pytest.fixture
+def sample_match_3v3():
+    """Create a 3v3 match."""
+    return Match(
+        id=1,
+        team1=("Alice", "Bob", "Charlie"),
+        team2=("Dave", "Eve", "Frank")
+    )
+
+
+@pytest.fixture
+def sample_match_1v2():
+    """Create a 1v2 asymmetric match."""
+    return Match(
+        id=1,
+        team1=("Alice",),
+        team2=("Bob", "Charlie")
+    )
+
+
+@pytest.fixture
 def four_players():
     """Create a list of 4 player names."""
     return ["Alice", "Bob", "Charlie", "Dave"]
@@ -79,13 +127,45 @@ def five_players():
 
 @pytest.fixture
 def sample_tournament(four_players):
-    """Create a sample tournament with 4 players."""
+    """Create a sample 2v2 tournament with 4 players."""
     players = [Player(name=name) for name in four_players]
-    matches = generate_matches(four_players, shuffle=False)
+    matches = generate_matches(four_players, team1_size=2, team2_size=2, shuffle=False)
     return Tournament(
         name="Test Tournament",
         players=players,
         matches=matches,
+        team1_size=2,
+        team2_size=2,
+        created_at=datetime(2024, 1, 15, 10, 30, 0)
+    )
+
+
+@pytest.fixture
+def sample_tournament_1v1(four_players):
+    """Create a sample 1v1 tournament with 4 players."""
+    players = [Player(name=name) for name in four_players]
+    matches = generate_matches(four_players, team1_size=1, team2_size=1, shuffle=False)
+    return Tournament(
+        name="Test 1v1 Tournament",
+        players=players,
+        matches=matches,
+        team1_size=1,
+        team2_size=1,
+        created_at=datetime(2024, 1, 15, 10, 30, 0)
+    )
+
+
+@pytest.fixture
+def sample_tournament_1v2(three_players):
+    """Create a sample 1v2 tournament with 3 players."""
+    players = [Player(name=name) for name in three_players]
+    matches = generate_matches(three_players, team1_size=1, team2_size=2, shuffle=False)
+    return Tournament(
+        name="Test 1v2 Tournament",
+        players=players,
+        matches=matches,
+        team1_size=1,
+        team2_size=2,
         created_at=datetime(2024, 1, 15, 10, 30, 0)
     )
 

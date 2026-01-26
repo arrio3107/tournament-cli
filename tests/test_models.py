@@ -191,6 +191,32 @@ class TestTournament:
         assert len(sample_tournament.players) == 4
         assert len(sample_tournament.matches) == 3  # 4 players = 3 matches
 
+    def test_tournament_default_team_sizes(self):
+        """Test that default team sizes are 2."""
+        tournament = Tournament(name="Test", players=[], matches=[])
+        assert tournament.team1_size == 2
+        assert tournament.team2_size == 2
+
+    def test_tournament_mode_property(self, sample_tournament):
+        """Test mode property for symmetric tournament."""
+        assert sample_tournament.mode == "2v2"
+
+    def test_tournament_mode_1v1(self, sample_tournament_1v1):
+        """Test mode property for 1v1 tournament."""
+        assert sample_tournament_1v1.mode == "1v1"
+
+    def test_tournament_mode_asymmetric(self, sample_tournament_1v2):
+        """Test mode property for asymmetric tournament."""
+        assert sample_tournament_1v2.mode == "1v2"
+
+    def test_tournament_is_symmetric_true(self, sample_tournament):
+        """Test is_symmetric for symmetric tournament."""
+        assert sample_tournament.is_symmetric is True
+
+    def test_tournament_is_symmetric_false(self, sample_tournament_1v2):
+        """Test is_symmetric for asymmetric tournament."""
+        assert sample_tournament_1v2.is_symmetric is False
+
     def test_total_matches(self, sample_tournament):
         """Test total_matches property."""
         assert sample_tournament.total_matches == 3
@@ -264,6 +290,8 @@ class TestTournament:
         assert len(data["players"]) == 4
         assert len(data["matches"]) == 3
         assert "created_at" in data
+        assert data["team1_size"] == 2
+        assert data["team2_size"] == 2
 
     def test_from_dict(self, sample_tournament):
         """Test deserialization from dictionary."""
@@ -272,6 +300,20 @@ class TestTournament:
         assert restored.name == sample_tournament.name
         assert len(restored.players) == len(sample_tournament.players)
         assert len(restored.matches) == len(sample_tournament.matches)
+        assert restored.team1_size == sample_tournament.team1_size
+        assert restored.team2_size == sample_tournament.team2_size
+
+    def test_from_dict_legacy_compatibility(self, sample_tournament):
+        """Test that loading old tournaments without team sizes uses defaults."""
+        data = sample_tournament.to_dict()
+        # Remove team size fields to simulate old format
+        del data["team1_size"]
+        del data["team2_size"]
+
+        restored = Tournament.from_dict(data)
+        # Should use default values of 2
+        assert restored.team1_size == 2
+        assert restored.team2_size == 2
 
     def test_roundtrip_serialization(self, sample_tournament):
         """Test complete serialization roundtrip."""
@@ -280,3 +322,67 @@ class TestTournament:
         assert restored.name == sample_tournament.name
         assert restored.created_at == sample_tournament.created_at
         assert [p.name for p in restored.players] == [p.name for p in sample_tournament.players]
+        assert restored.team1_size == sample_tournament.team1_size
+        assert restored.team2_size == sample_tournament.team2_size
+
+    def test_roundtrip_serialization_1v2(self, sample_tournament_1v2):
+        """Test serialization roundtrip for asymmetric tournament."""
+        data = sample_tournament_1v2.to_dict()
+        restored = Tournament.from_dict(data)
+        assert restored.team1_size == 1
+        assert restored.team2_size == 2
+        assert restored.mode == "1v2"
+        assert restored.is_symmetric is False
+
+    def test_current_round_count_single_round(self, sample_tournament):
+        """Test current_round_count for single-round tournament."""
+        assert sample_tournament.current_round_count == 1
+
+    def test_current_round_count_empty(self):
+        """Test current_round_count with no matches."""
+        tournament = Tournament(name="Empty", players=[], matches=[])
+        assert tournament.current_round_count == 0
+
+    def test_matches_per_round(self, sample_tournament):
+        """Test matches_per_round property."""
+        # 4 players in 2v2 = 3 matches per round
+        assert sample_tournament.matches_per_round == 3
+
+
+class TestMatchRound:
+    """Tests for Match round field."""
+
+    def test_match_default_round(self):
+        """Test that match defaults to round 1."""
+        match = Match(id=1, team1=("A", "B"), team2=("C", "D"))
+        assert match.round == 1
+
+    def test_match_with_round(self):
+        """Test match with explicit round."""
+        match = Match(id=1, team1=("A", "B"), team2=("C", "D"), round=3)
+        assert match.round == 3
+
+    def test_match_round_serialization(self):
+        """Test round field is serialized."""
+        match = Match(id=1, team1=("A", "B"), team2=("C", "D"), round=2)
+        data = match.to_dict()
+        assert data["round"] == 2
+
+    def test_match_round_deserialization(self):
+        """Test round field is deserialized."""
+        data = {"id": 1, "team1": ["A", "B"], "team2": ["C", "D"], "round": 3}
+        match = Match.from_dict(data)
+        assert match.round == 3
+
+    def test_match_round_backward_compatibility(self):
+        """Test that old match data without round field defaults to 1."""
+        data = {"id": 1, "team1": ["A", "B"], "team2": ["C", "D"]}
+        match = Match.from_dict(data)
+        assert match.round == 1
+
+    def test_match_round_roundtrip(self):
+        """Test round field survives serialization roundtrip."""
+        match = Match(id=5, team1=("A", "B"), team2=("C", "D"), round=4, score1=2, score2=1)
+        data = match.to_dict()
+        restored = Match.from_dict(data)
+        assert restored.round == 4

@@ -7,7 +7,28 @@ from tournament_cli.models import Tournament, Player, PlayerStats, Match
 from tournament_cli.display import (
     calculate_partnership_stats,
     calculate_team_stats,
+    format_team,
 )
+
+
+class TestFormatTeam:
+    """Tests for format_team function."""
+
+    def test_single_player(self):
+        """Test formatting a single player team."""
+        assert format_team(("Alice",)) == "Alice"
+
+    def test_two_players(self):
+        """Test formatting a two player team."""
+        assert format_team(("Alice", "Bob")) == "Alice & Bob"
+
+    def test_three_players(self):
+        """Test formatting a three player team."""
+        assert format_team(("Alice", "Bob", "Charlie")) == "Alice & Bob & Charlie"
+
+    def test_four_players(self):
+        """Test formatting a four player team."""
+        assert format_team(("A", "B", "C", "D")) == "A & B & C & D"
 
 
 class TestCalculatePartnershipStats:
@@ -68,6 +89,16 @@ class TestCalculatePartnershipStats:
         sample_tournament.matches[0].score2 = 1
 
         stats = calculate_partnership_stats("Unknown", sample_tournament)
+        assert stats == {}
+
+    def test_1v1_no_partnerships(self, sample_tournament_1v1):
+        """Test that 1v1 tournaments have no partnership stats."""
+        # Play a match
+        sample_tournament_1v1.matches[0].score1 = 2
+        sample_tournament_1v1.matches[0].score2 = 1
+
+        stats = calculate_partnership_stats("Alice", sample_tournament_1v1)
+        # In 1v1, there are no partners
         assert stats == {}
 
 

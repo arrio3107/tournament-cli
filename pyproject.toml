@@ -30,6 +30,7 @@ dependencies = [
     "rich>=13.0.0",
     "markdown>=3.5.0",
     "weasyprint>=60.0",
+    "textual>=0.40.0",
 ]
 
 [project.optional-dependencies]
@@ -45,6 +46,7 @@ Issues = "https://github.com/strehk/tournament-cli/issues"
 
 [project.scripts]
 tournament-cli = "tournament_cli.cli:app"
+tournament-tui = "tournament_cli.tui:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
