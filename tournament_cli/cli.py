@@ -447,6 +447,28 @@ def reset():
 
 
 @app.command()
+def tui():
+    """Launch interactive TUI mode.
+
+    Opens a full-screen terminal interface with keyboard navigation for managing
+    the current tournament. Requires a tournament to be loaded first.
+
+    Keyboard shortcuts:
+        m: Focus matches panel
+        s: Focus standings panel
+        i: Focus score input
+        Tab: Cycle between panels
+        j/k or arrows: Navigate up/down
+        Enter: Context-sensitive action
+        n: Jump to next unplayed match
+        r: Refresh from disk
+        q: Quit
+    """
+    from tournament_cli.tui import main as tui_main
+    tui_main()
+
+
+@app.command()
 def export(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
     pdf: bool = typer.Option(False, "--pdf", "-p", help="Export as PDF instead of Markdown"),
