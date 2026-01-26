@@ -46,10 +46,14 @@ pip install -e .
 ### 1. Create a tournament
 
 ```bash
-tournament-cli new "Game Night"
+# Using interactive player entry
+tournament-cli new "Game Night" --mode 2v2
+
+# Or provide players directly (skip prompts)
+tournament-cli new "Game Night" -m 2v2 -p "Alice,Bob,Carol,Dave"
 ```
 
-You'll be prompted to enter player names (minimum 4 players).
+The `--mode` (`-m`) flag is required. Use `--players` (`-p`) to skip the interactive prompt.
 
 ### 2. Play matches
 
@@ -91,8 +95,11 @@ Real-world scenarios for your gaming sessions.
 Friday FIFA night with the usual crew. Everyone plays with and against everyone.
 
 ```bash
-tournament-cli new "Friday FIFA" --mode 2v2
-# Enter: Marcus, Dennis, Kevin, Steve
+# Interactive player entry
+tournament-cli new "Friday FIFA" -m 2v2
+
+# Or skip the prompts
+tournament-cli new "Friday FIFA" -m 2v2 -p "Marcus,Dennis,Kevin,Steve"
 ```
 
 3 matches total - perfect for a quick session.
@@ -102,7 +109,7 @@ tournament-cli new "Friday FIFA" --mode 2v2
 Fifth wheel shows up uninvited. Someone rotates out each match.
 
 ```bash
-tournament-cli new "Awkward Fifth" --mode 2v2
+tournament-cli new "Awkward Fifth" -m 2v2 -p "Alice,Bob,Carol,Dave,Eve"
 ```
 
 15 matches total - the CLI handles rotation automatically.
@@ -112,18 +119,20 @@ tournament-cli new "Awkward Fifth" --mode 2v2
 That one friend who's "too good" plays solo against a duo. Nobody waits, everyone plays every match.
 
 ```bash
-tournament-cli new "Humble Marcus" --mode 1v2
-# Enter 3 players - great for uneven skill levels
+tournament-cli new "Humble Marcus" -m 1v2 -p "Marcus,Dennis,Kevin"
 ```
+
+Great for uneven skill levels - 3 players minimum.
 
 ### 1v1 Duel (2 Players)
 
 Just two rivals settling the score. No teammates to blame.
 
 ```bash
-tournament-cli new "The Reckoning" --mode 1v1
-# Single match, winner takes bragging rights
+tournament-cli new "The Reckoning" -m 1v1 -p "Marcus,Dennis"
 ```
+
+Single match, winner takes bragging rights.
 
 ### 1v1 with Pre-formed Teams (Workaround)
 
@@ -132,8 +141,7 @@ Couples tournament - 4 pairs compete as units.
 **Trick:** Enter team names as "players" instead of individual names.
 
 ```bash
-tournament-cli new "Couples Clash" --mode 1v1
-# Enter team names: "Tom+Sarah", "The Couch Potatoes", "Team No Sleep", etc.
+tournament-cli new "Couples Clash" -m 1v1 -p "Tom+Sarah,The Couch Potatoes,Team No Sleep,Night Owls"
 ```
 
 ### 3v3 Mode (6 Players)
@@ -141,24 +149,26 @@ tournament-cli new "Couples Clash" --mode 1v1
 Rocket League night - full 3v3 chaos.
 
 ```bash
-tournament-cli new "Rocket Night" --mode 3v3
-# Everyone plays with and against everyone
+tournament-cli new "Rocket Night" -m 3v3 -p "Alice,Bob,Carol,Dave,Eve,Frank"
 ```
+
+Everyone plays with and against everyone.
 
 ### Double Header (--rounds 2)
 
 Nobody wants the night to end. Run the whole schedule twice.
 
 ```bash
-tournament-cli new "Marathon Night" --mode 2v2 --rounds 2
-# Use `add-round` mid-tournament if you decide to extend
+tournament-cli new "Marathon Night" -m 2v2 -p "Alice,Bob,Carol,Dave" --rounds 2
 ```
+
+Use `add-round` mid-tournament if you decide to extend.
 
 ## Commands Reference
 
-| Command          | Description                     |
-| ---------------- | ------------------------------- |
-| `new <name>`     | Create a new tournament         |
+| Command                    | Description                     |
+| -------------------------- | ------------------------------- |
+| `new <name> -m <mode>`     | Create a new tournament         |
 | `list`           | List all saved tournaments      |
 | `load <name>`    | Load an existing tournament     |
 | `status`         | Show tournament overview        |
